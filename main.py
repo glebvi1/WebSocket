@@ -1,8 +1,16 @@
+import logging
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from ConnectionManager import ConnectionManager
 
 app = FastAPI()
 manager = ConnectionManager()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    filename="info.log"
+)
 
 
 @app.websocket("/")
@@ -13,25 +21,29 @@ async def websocket_sim(websocket: WebSocket):
         answer = await websocket.receive_text()
 
         if answer == "its_cli":
+            logging.debug("Подключение нового клиента...")
             client_id = await manager.connect_cli(websocket)
 
             while True:
                 data = await websocket.receive_text()
-                # print(f"Данные с клиента №{client_id}: ", data)
                 await manager.send_to_sim(f"{client_id},{data}")
 
         elif answer == "its_sim":
             manager.sim = websocket
-            print("Симулятор подключен:", websocket)
+            logging.info(f"Симулятор подключен: {websocket}")
 
             while True:
                 data = await websocket.receive_text()
                 split_data = data.split(",")
                 client_id = int(split_data[0])
-                # print(f"Отправлено клиенту №{client_id}:", ",".join(split_data[1:]))
+                logging.debug(f"Отправлено клиенту №{client_id}: \"" + ",".join(split_data[1:]) + "\"")
                 await manager.send_to_cli(client_id, ",".join(split_data[1:]))
     except WebSocketDisconnect:
-        await manager.disconnect(websocket)
+        if manager.sim == websocket:
+            manager.sim = None
+            logging.critical("Симулятор отключился")
+        else:
+            await manager.disconnect(websocket)
 
 
 if __name__ == "__main__":

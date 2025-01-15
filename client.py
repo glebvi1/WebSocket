@@ -1,6 +1,5 @@
 import asyncio
 import websockets
-import threading
 
 URI = "ws://localhost:41235/"
 
