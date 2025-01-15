@@ -18,12 +18,15 @@ class ConnectionManager:
         self.id1 += 1
         return self.id1 - 1
 
-    def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket):
         remove_id = 0
         for id, socket in self.clients.items():
             if socket == websocket:
                 remove_id = id
+                break
         self.clients.pop(remove_id)
+        await self.send_to_sim(f"{remove_id},closed")
+        print(f"Клиент {remove_id} отсоединился")
 
     async def send_to_sim(self, message: str):
         await self.sim.send_text(message)

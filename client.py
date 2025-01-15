@@ -1,5 +1,6 @@
 import asyncio
 import websockets
+import threading
 
 URI = "ws://localhost:41235/"
 
@@ -14,7 +15,7 @@ async def websocket_client():
                 # формально, на основе данных с сервера (data), клиент
                 # их как-то анализирует и создает data1
                 data1 = "step,1"
-                print(f"Клиент получил:", data)
+                # print(f"Клиент получил:", data)
                 await websocket.send(data1)
 
 
