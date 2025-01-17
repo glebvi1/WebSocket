@@ -10,6 +10,10 @@ class ConnectionManager:
         self.id1: int = 1
         self.sim: Optional[WebSocket] = None
 
+    def connect_sim(self, websocket: WebSocket):
+        self.sim = websocket
+        logging.info(f"Симулятор подключен: {websocket}")
+
     async def connect_cli(self, websocket: WebSocket):
         self.clients[self.id1] = websocket
         logging.debug(f"Создал клиента №{self.id1}")

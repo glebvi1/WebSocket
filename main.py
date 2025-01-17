@@ -13,6 +13,13 @@ logging.basicConfig(
 )
 
 
+def create_message(data: str):
+    split_data = data.split(",")
+    client_id = int(split_data[0])
+
+    return ",".join(split_data[1:]), client_id
+
+
 @app.websocket("/")
 async def websocket_sim(websocket: WebSocket):
     await websocket.accept()
@@ -29,15 +36,13 @@ async def websocket_sim(websocket: WebSocket):
                 await manager.send_to_sim(f"{client_id},{data}")
 
         elif answer == "its_sim":
-            manager.sim = websocket
-            logging.info(f"Симулятор подключен: {websocket}")
+            manager.connect_sim(websocket)
 
             while True:
                 data = await websocket.receive_text()
-                split_data = data.split(",")
-                client_id = int(split_data[0])
-                logging.debug(f"Отправлено клиенту №{client_id}: \"" + ",".join(split_data[1:]) + "\"")
-                await manager.send_to_cli(client_id, ",".join(split_data[1:]))
+                message, client_id = create_message(data)
+                await manager.send_to_cli(client_id, message)
+
     except WebSocketDisconnect:
         if manager.sim == websocket:
             manager.sim = None
