@@ -4,20 +4,24 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from ConnectionManager import ConnectionManager
 
 app = FastAPI()
-manager = ConnectionManager()
+manager = ConnectionManager(is_debug=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    filename="info.log"
+    filename="logs/info.log"
 )
 
 
-def create_message(data: str):
+def create_message_to_cli(data: str):
     split_data = data.split(",")
     client_id = int(split_data[0])
 
-    return ",".join(split_data[1:]), client_id
+    return client_id, ",".join(split_data[1:])
+
+
+def create_message_to_sim(client_id: int, data: str):
+    return f"{client_id},{data}"
 
 
 @app.websocket("/")
@@ -33,14 +37,14 @@ async def websocket_sim(websocket: WebSocket):
 
             while True:
                 data = await websocket.receive_text()
-                await manager.send_to_sim(f"{client_id},{data}")
+                await manager.send_to_sim(client_id, create_message_to_sim(client_id, data))
 
         elif answer == "its_sim":
             manager.connect_sim(websocket)
 
             while True:
                 data = await websocket.receive_text()
-                message, client_id = create_message(data)
+                client_id, message = create_message_to_cli(data)
                 await manager.send_to_cli(client_id, message)
 
     except WebSocketDisconnect:
