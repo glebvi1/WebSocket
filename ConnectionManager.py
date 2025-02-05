@@ -91,7 +91,7 @@ class ConnectionManager:
         if self.is_debug:
             self.times[client_id][-1].append(time.time())
 
-        await self.clients[client_id].send_text(message)
+        await self.clients[client_id].send_text(str(client_id) + "," + message)
         logging.debug(f"Отправленно клиенту №{client_id}: \"{message}\"")
 
     def save_to_file(self):

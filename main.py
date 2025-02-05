@@ -4,12 +4,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from ConnectionManager import ConnectionManager
 
 app = FastAPI()
-manager = ConnectionManager(is_debug=True)
+manager = ConnectionManager()
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    filename="logs/info.log"
+    filename="logs/debug.log"
 )
 
 
