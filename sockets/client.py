@@ -1,8 +1,7 @@
 import asyncio
 import websockets
 
-URI = "ws://localhost:41235/"
-SIM_TYPE = "fire"
+from sockets import URI, SIM_TYPE
 
 
 async def websocket_client(analyze):
@@ -19,8 +18,8 @@ async def websocket_client(analyze):
 
 
 if __name__ == "__main__":
-    if SIM_TYPE == "default":
+    if SIM_TYPE == "neuromorph":
         asyncio.run(websocket_client(lambda _: "0,0,0,0"))
-    elif SIM_TYPE == "fire":
+    elif SIM_TYPE == "firefighter":
         from algorithm.PID import analyze
         asyncio.run(websocket_client(analyze))

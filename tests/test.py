@@ -1,9 +1,9 @@
 import asyncio
-from client import websocket_client
+from sockets.client import websocket_client
 
 
 def default_analyze(data):
-    return "1,step"
+    return "0,0,0,0"
 
 
 async def run_3clients():
@@ -52,4 +52,4 @@ async def run_30clients2():
 
 
 if __name__ == "__main__":
-    asyncio.run(run_30clients2())
+    asyncio.run(run_3clients())

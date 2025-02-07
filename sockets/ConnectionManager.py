@@ -1,10 +1,10 @@
 import logging
 import time
-from tests import PATH_TEST
-import json
+from typing import Optional
 
 from fastapi import WebSocket
-from typing import Optional
+
+from service.test_service import save_dict_to_json
 
 
 class ConnectionManager:
@@ -52,7 +52,7 @@ class ConnectionManager:
         self.clients.pop(remove_id)
 
         if self.is_debug and len(self.clients) == 0:
-            self.save_to_file()
+            save_dict_to_json(self.times)
 
         await self.send_to_sim(remove_id, f"{remove_id},closed")
         logging.info(f"Клиент №{remove_id} отсоединился")
@@ -91,10 +91,5 @@ class ConnectionManager:
         if self.is_debug:
             self.times[client_id][-1].append(time.time())
 
-        #await self.clients[client_id].send_text(str(client_id) + "," + message)
         await self.clients[client_id].send_text(message)
         logging.debug(f"Отправленно клиенту №{client_id}: \"{message}\"")
-
-    def save_to_file(self):
-        with open(PATH_TEST + "time2.json", "w") as fp:
-            json.dump(self.times, fp)
