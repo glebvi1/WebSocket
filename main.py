@@ -14,10 +14,13 @@ logging.basicConfig(
 
 
 def create_message_to_cli(data: str):
-    split_data = data.split(",")
-    client_id = int(split_data[0])
-
-    return client_id, ",".join(split_data[1:])
+    # split_data = data.split(",")
+    # client_id = int(split_data[0])
+    #
+    # return client_id, ",".join(split_data[1:])
+    import json
+    client_id = json.loads(data)["id"]
+    return client_id, data
 
 
 def create_message_to_sim(client_id: int, data: str):

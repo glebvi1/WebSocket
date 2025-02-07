@@ -5,7 +5,6 @@ data_for_pid = {}
 
 def analyze(str_data: str):
     data = json.loads(str_data)
-    print(data)
     current = data["current_vector"][1]
     target = data["target_vector"][1]
     engine = 0
@@ -16,6 +15,8 @@ def analyze(str_data: str):
         engine = 100
     else:                           # летим вниз
         engine = 0
+
+    print(f"Current = {current}, target = {target}, engine = {engine}")
 
     result = {"id": data["id"], "engines": {
         "fr": engine,
