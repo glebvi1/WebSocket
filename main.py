@@ -24,7 +24,8 @@ def create_message_to_cli(data: str):
 
 
 def create_message_to_sim(client_id: int, data: str):
-    return f"{client_id},{data}"
+    # return f"{client_id},{data}"
+    return data
 
 
 @app.websocket("/")
