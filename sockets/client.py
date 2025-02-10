@@ -1,7 +1,10 @@
 import asyncio
 import websockets
 
-from sockets import URI, SIM_TYPE
+import sys
+sys.path.insert(0, "../")
+
+from sockets import SIM_TYPE, URI
 
 
 async def websocket_client(analyze):
