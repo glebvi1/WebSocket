@@ -8,12 +8,8 @@ z_kp, z_ki, z_kd = 20.0, 5.0, 3.0
 
 calculate_cos_clock = time.time()
 pid_clock = time.time()
-prev_x, prev_y = 0, 0
 prev_cos = 0
-# 0 -- forward
-# 1 -- left
-# 2 -- right
-prev_direction = 0 # направление "рысканья"
+prev_direction = 0
 target_axis_y = 0
 yaw_right, yaw_left = 0, 0
 prev_pos = [0, 0, 0]
@@ -67,13 +63,11 @@ def calculate_cos(data: dict):
     global prev_direction, calculate_cos_clock, calculate_cos_clock_delay, prev_cos, target_axis_y, yaw_right, yaw_left, prev_pos
     target_x, target_y = data["targetVector"]["z"], data["targetVector"]["x"]
     current_x, current_y = data["droneVector"]["z"], data["droneVector"]["x"]
-    yaw_right, yaw_left = 0, 0
 
     if (abs(target_x - current_x) >= 30 or abs(target_y - current_y) >= 30) and get_clock(calculate_cos_clock) > calculate_cos_clock_delay:
-        cos = (target_x * (current_x - prev_x) + target_y * (current_y - prev_y)) / ((target_x ** 2 + target_y ** 2) ** 0.5 * ((current_x - prev_x) ** 2 + (current_y - prev_y) ** 2) ** 0.5)
+        cos = (target_x * (current_x - prev_pos[0]) + target_y * (current_y - prev_pos[1])) / ((target_x ** 2 + target_y ** 2) ** 0.5 * ((current_x - prev_pos[0]) ** 2 + (current_y - prev_pos[1]) ** 2) ** 0.5)
 
-        yaw_left, yaw_right = 0, 0
-        data["targetAxisRotation"]["x"] = -20
+        #data["targetAxisRotation"]["x"] = -20
 
         if cos < 0.95:
             if prev_cos > cos:
@@ -122,7 +116,6 @@ def calculate_engine(data):
 
 def analyze(str_data: str):
     data = json.loads(str_data)
-    print(data)
     calculate_cos(data)
     engines = calculate_engine(data)
 
