@@ -17,7 +17,7 @@ prev_direction = 0 # направление "рысканья"
 target_axis_y = 0
 yaw_right, yaw_left = 0, 0
 prev_pos = [0, 0, 0]
-
+motorSpeed = [0 for _ in range(8)]
 
 err_x, err_y = 0, 0
 integral_x, prevErr_x = 0, 0
@@ -65,15 +65,15 @@ def get_clock(timer):
 
 def calculate_cos(data: dict):
     global prev_direction, calculate_cos_clock, calculate_cos_clock_delay, prev_cos, target_axis_y, yaw_right, yaw_left, prev_pos
-    target_x, target_y = data["targetVector"]["x"], data["targetVector"]["z"]
-    current_x, current_y = data["droneVector"]["x"], data["droneVector"]["z"]
+    target_x, target_y = data["targetVector"]["z"], data["targetVector"]["x"]
+    current_x, current_y = data["droneVector"]["z"], data["droneVector"]["x"]
     yaw_right, yaw_left = 0, 0
 
     if (abs(target_x - current_x) >= 30 or abs(target_y - current_y) >= 30) and get_clock(calculate_cos_clock) > calculate_cos_clock_delay:
         cos = (target_x * (current_x - prev_x) + target_y * (current_y - prev_y)) / ((target_x ** 2 + target_y ** 2) ** 0.5 * ((current_x - prev_x) ** 2 + (current_y - prev_y) ** 2) ** 0.5)
 
         yaw_left, yaw_right = 0, 0
-        data["targetAxisRotation"]["z"] = -20
+        data["targetAxisRotation"]["x"] = -20
 
         if cos < 0.95:
             if prev_cos > cos:
@@ -95,13 +95,11 @@ def calculate_cos(data: dict):
 
 
 def calculate_engine(data):
-    global pid_clock, dt
+    global pid_clock, dt, motorSpeed
 
-    axis_x, axis_y = float(data["droneAxisRotation"]["x"]), float(data["droneAxisRotation"]["z"])
-    target_axis_x, target_axis_y = data["targetAxisRotation"]["x"], data["targetAxisRotation"]["z"]
+    axis_x, axis_y = float(data["droneAxisRotation"]["z"]), float(data["droneAxisRotation"]["x"])
+    target_axis_x, target_axis_y = data["targetAxisRotation"]["z"], data["targetAxisRotation"]["x"]
     current_z, target_z = data["droneVector"]["y"], data["targetVector"]["y"]
-
-    motorSpeed = [0 for _ in range(8)]
 
     if get_clock(pid_clock) > dt:
         xSpeed = computePID_X(axis_x, target_axis_x, hor_kp, hor_ki, hor_kd, dt, -15, 15)
@@ -129,14 +127,14 @@ def analyze(str_data: str):
     engines = calculate_engine(data)
 
     result = {"id": data["id"], "engines": {
-        "fr": engines[0],
-        "fl": engines[1],
-        "br": engines[2],
-        "bl": engines[3],
-        "rf": engines[4],
-        "rb": engines[5],
-        "lf": engines[6],
-        "lb": engines[7],
+        "fr": engines[1],
+        "fl": engines[0],
+        "br": engines[4],
+        "bl": engines[5],
+        "rf": engines[2],
+        "rb": engines[3],
+        "lf": engines[7],
+        "lb": engines[6],
     }}
 
     return json.dumps(result)
