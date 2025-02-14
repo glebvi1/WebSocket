@@ -1,12 +1,12 @@
 import logging
-
+import sys
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from service.message_service import create_message_to_cli, create_message_to_sim
-from sockets.ConnectionManager import ConnectionManager
+sys.path.insert(0, "../")
+
+from algorithm.PID import analyze
 
 app = FastAPI()
-manager = ConnectionManager()
 
 
 @app.websocket("/")
@@ -16,25 +16,20 @@ async def websocket_sim(websocket: WebSocket):
         await websocket.send_text("who_r_u")
         answer = await websocket.receive_text()
 
-        if answer == "its_cli":
-            logging.debug("Подключение нового клиента...")
-            client_id = await manager.connect_cli(websocket)
+        if answer != "its_sim":
+            return
 
-            while True:
-                data = await websocket.receive_text()
-                await manager.send_to_sim(client_id, create_message_to_sim(client_id, data))
+        logging.info(f"Симулятор подключен: {websocket}")
+        await websocket.send_text("1,new_connect")  # ?
 
-        elif answer == "its_sim":
-            manager.connect_sim(websocket)
+        while True:
+            data = await websocket.receive_text()
+            logging.debug(f"Данные с симулятора: {data}")
 
-            while True:
-                data = await websocket.receive_text()
-                client_id, message = create_message_to_cli(data)
-                await manager.send_to_cli(client_id, message)
+            new_data = analyze(data)
+            logging.debug(f"Ответ: {new_data}")
+
+            await websocket.send_text(new_data)
 
     except WebSocketDisconnect:
-        if manager.sim == websocket:
-            manager.sim = None
-            logging.critical("Симулятор отключился")
-        else:
-            await manager.disconnect(websocket)
+        logging.critical("Симулятор отключился")
